@@ -1,4 +1,4 @@
-package com.navaneeth.hub;
+package com.academic.hub;
 
 import android.Manifest;
 import android.app.*;
