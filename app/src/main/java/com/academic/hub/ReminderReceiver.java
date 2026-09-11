@@ -1,3 +1,3 @@
-package com.academic.hub;
+package com.navaneeth.hub;
 import android.app.*;import android.content.*;import android.os.*;
 public class ReminderReceiver extends BroadcastReceiver { public void onReceive(Context c,Intent i){String title=i.getStringExtra("title");String ch="academic_reminders";NotificationManager n=(NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);if(Build.VERSION.SDK_INT>=26)n.createNotificationChannel(new NotificationChannel(ch,"Academic reminders",NotificationManager.IMPORTANCE_HIGH));Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(c,ch):new Notification.Builder(c);b.setSmallIcon(android.R.drawable.ic_popup_reminder).setContentTitle("HUB").setContentText(title==null?"You have a pending reminder":title).setAutoCancel(true);n.notify((int)System.currentTimeMillis(),b.build());}}
