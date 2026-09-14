@@ -46,9 +46,8 @@ header .avatar{margin-left:2px;background:#f3e5d1;width:40px;height:40px;border-
 .wrap{
 position:fixed;
 top:calc(78px + var(--android-status-inset,0px));
-left:0;
-right:0;
-bottom:calc(82px + var(--android-nav-inset,0px));
+left:0;right:0;
+bottom:calc(var(--nav-height,82px) + var(--android-nav-inset,0px));
 overflow-y:auto;
 overflow-x:hidden;
 -webkit-overflow-scrolling:touch;
@@ -92,11 +91,7 @@ color:var(--ink);
 
 .modal{
 position:fixed;
-top:0;
-left:0;
-right:0;
-bottom:0;
-height:100dvh;
+top:0;left:0;right:0;bottom:0;
 background:#0008;
 display:none;
 align-items:flex-end;
@@ -106,7 +101,7 @@ overflow:hidden;
 .sheet{
 background:var(--bg);
 width:100%;
-max-height:calc(100dvh - var(--keyboard-height,0px) - 16px);
+max-height:calc(100% - 16px);
 overflow-y:auto;
 -webkit-overflow-scrolling:touch;
 overscroll-behavior:contain;
@@ -114,7 +109,6 @@ box-sizing:border-box;
 border-radius:24px 24px 0 0;
 padding:24px 24px calc(32px + var(--android-nav-inset,0px));
 }
-
 .nav{
 position:fixed;
 bottom:var(--android-nav-inset,0px);
@@ -155,6 +149,10 @@ padding-bottom:env(safe-area-inset-bottom,0px);
 .money-entry-info{color:var(--muted);font-size:13px;margin-top:4px}
 .money-entry-amount{font-weight:700;white-space:nowrap}
 .money-delete{font-size:12px}
+.money-bar-row{margin:10px 0}
+.money-bar-label{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+.money-bar-track{background:#ebe9df;border-radius:8px;height:10px;overflow:hidden}
+.money-bar-fill{background:var(--teal);height:100%;border-radius:8px}
 
 </style>
 </head>
@@ -164,7 +162,7 @@ padding-bottom:env(safe-area-inset-bottom,0px);
 <header>
 <b>HUB</b>
 <span class="status">● LOCAL</span>
-<span id="clock">10:26 pm IST</span>
+<span id="clock">--:-- IST</span>
 <span class="avatar">N</span>
 </header>
 
@@ -172,7 +170,7 @@ padding-bottom:env(safe-area-inset-bottom,0px);
 
 <section id="dashboard" class="page active">
 
-<h1 id="greet">Good night, Navaneeth</h1>
+<h1 id="greet">Good day</h1>
 <div class="small" id="today"></div>
 
 <div class="card">
@@ -414,6 +412,16 @@ total:1500
 
 let timer=null;
 
+/* ---- safe bridge call (avoids crashing when previewing outside the Android app) ---- */
+function androidCall(fn,...args){
+  try{
+    if(typeof Android!=='undefined' && typeof Android[fn]==='function'){
+      Android[fn](...args);
+    }
+  }catch(e){
+    console.warn('Android bridge unavailable:',fn,e);
+  }
+}
 
 function show(id){
 
@@ -847,7 +855,7 @@ when
 
 save('dates',dates);
 
-Android.scheduleReminder(title,when);
+androidCall('scheduleReminder',title,when);
 
 closeM();
 
@@ -872,7 +880,8 @@ function calendar(id){
 let d=dates.find(x=>x.id===id);
 
 if(d)
-Android.addCalendar(
+androidCall(
+'addCalendar',
 d.title,
 String(d.when),
 String(d.when+3600000),
@@ -888,7 +897,8 @@ let pending=tasks.filter(t=>!t.done);
 
 if(pending.length)
 
-Android.scheduleReminder(
+androidCall(
+'scheduleReminder',
 pending.length+' pending academic task(s)',
 Date.now()+1000
 );
@@ -1214,6 +1224,17 @@ render();
 }
 
 
+function delSpending(id){
+
+spending=spending.filter(x=>x.id!==id);
+
+save('spending',spending);
+
+render();
+
+}
+
+
 function renderMoney(){
 
 const now=new Date();
@@ -1330,4 +1351,200 @@ Object.entries(categories)
 const breakdownBox=
 document.getElementById('spendingBreakdown');
 
-const
+const breakdownStatus=
+document.getElementById('breakdownStatus');
+
+if(breakdown.length){
+
+breakdownStatus.textContent=
+breakdown.length+' categor'+(breakdown.length===1?'y':'ies');
+
+breakdownBox.innerHTML=
+breakdown.map(([cat,amt])=>{
+
+const pct=
+monthTotal?Math.round((amt/monthTotal)*100):0;
+
+return `
+<div class="money-bar-row">
+<div class="money-bar-label">
+<span>${esc(cat)}</span>
+<span>₹${amt.toFixed(2)} · ${pct}%</span>
+</div>
+<div class="money-bar-track">
+<div class="money-bar-fill" style="width:${pct}%"></div>
+</div>
+</div>
+`;
+
+}).join('');
+
+}else{
+
+breakdownStatus.textContent='No spending yet';
+
+breakdownBox.innerHTML=
+'<div class="empty">No spending recorded yet.</div>';
+
+}
+
+
+/* RECENT SPENDING */
+
+const recentBox=
+document.getElementById('recentSpending');
+
+const spendingCount=
+document.getElementById('spendingCount');
+
+spendingCount.textContent=
+spending.length+' entr'+(spending.length===1?'y':'ies');
+
+if(spending.length){
+
+const recent=
+[...spending]
+.sort((a,b)=>b.id-a.id)
+.slice(0,15);
+
+recentBox.innerHTML=
+recent.map(x=>`
+
+<div class="money-entry">
+
+<div>
+<div class="money-entry-title">${esc(x.title)}</div>
+<div class="money-entry-info">
+${esc(x.category||'Other')} · ${esc(x.date||'')}
+${x.note?(' · '+esc(x.note)):''}
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px">
+<div class="money-entry-amount">₹${Number(x.amount||0).toFixed(2)}</div>
+<button class="btn delete money-delete" onclick="delSpending(${x.id})">
+Delete
+</button>
+</div>
+
+</div>
+
+`).join('');
+
+}else{
+
+recentBox.innerHTML=
+'<div class="empty">No spending recorded yet.</div>';
+
+}
+
+}
+
+
+/* ---- greeting / clock ---- */
+
+function updateClock(){
+
+const now=new Date();
+
+let h=now.getHours();
+
+const m=String(now.getMinutes()).padStart(2,'0');
+
+const ampm=h>=12?'pm':'am';
+
+let h12=h%12;
+
+if(h12===0)h12=12;
+
+const clockEl=document.getElementById('clock');
+
+if(clockEl)
+clockEl.textContent=
+String(h12).padStart(2,'0')+':'+m+' '+ampm+' IST';
+
+const greetEl=document.getElementById('greet');
+
+if(greetEl){
+
+let greeting='Good night';
+
+if(h>=5&&h<12)greeting='Good morning';
+
+else if(h>=12&&h<17)greeting='Good afternoon';
+
+else if(h>=17&&h<21)greeting='Good evening';
+
+greetEl.textContent=greeting+', Navaneeth';
+
+}
+
+const todayEl=document.getElementById('today');
+
+if(todayEl)
+todayEl.textContent=
+now.getDate()+'/'+(now.getMonth()+1)+'/'+now.getFullYear();
+
+}
+
+
+/* ---- viewport / keyboard handling (cross-device) ---- */
+
+function setNavHeight(){
+  const nav=document.querySelector('.nav');
+  if(nav) document.documentElement.style.setProperty('--nav-height', nav.offsetHeight+'px');
+}
+
+function positionModal(){
+  const modal=document.getElementById('modal');
+  if(!modal) return;
+  if(window.visualViewport){
+    modal.style.height=window.visualViewport.height+'px';
+    modal.style.top=window.visualViewport.offsetTop+'px';
+  }else{
+    modal.style.height=window.innerHeight+'px';
+    modal.style.top='0px';
+  }
+}
+
+function scrollActiveIntoView(){
+  const active=document.activeElement;
+  if(active && active.matches('input,select,textarea')){
+    setTimeout(()=>active.scrollIntoView({block:'center',behavior:'smooth'}),300);
+  }
+}
+
+function updateKeyboard(){
+  positionModal();
+  scrollActiveIntoView();
+}
+
+window.addEventListener('load',()=>{ setNavHeight(); positionModal(); render(); updateClock(); });
+
+window.addEventListener('resize',()=>{ setNavHeight(); positionModal(); });
+
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',()=>{ positionModal(); scrollActiveIntoView(); });
+  window.visualViewport.addEventListener('scroll', positionModal);
+}else{
+  let lastHeight=window.innerHeight;
+  window.addEventListener('resize',()=>{
+    if(window.innerHeight<lastHeight-150){ scrollActiveIntoView(); }
+    lastHeight=window.innerHeight;
+  });
+}
+
+document.addEventListener('focusin', e=>{
+  if(e.target.matches('input,select,textarea')){
+    scrollActiveIntoView();
+  }
+});
+
+setInterval(updateClock,1000);
+
+if(sprint.running) startTick();
+
+</script>
+
+</body>
+</html>
