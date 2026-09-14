@@ -79,15 +79,18 @@ h2{font-size:22px;margin:0}
 .empty{color:var(--muted);padding:10px 0}
 
 .input{
-width:100%;
-padding:13px;
-border:1px solid #d7d3c8;
-border-radius:12px;
-margin:7px 0;
-background:#fff;
-font-size:16px;
-min-height:48px;
-color:var(--ink);
+    width:100%;
+    padding:13px;
+    border:1px solid #d7d3c8;
+    border-radius:12px;
+    margin:7px 0;
+    background:#fff;
+    font-size:16px;
+    min-height:48px;
+    color:var(--ink);
+    outline:none;
+    -webkit-appearance:none;
+    appearance:none;
 }
 
 .modal{
@@ -1467,17 +1470,43 @@ greeting+', Navaneeth';
 
 function updateKeyboard(){
 
-const vv=window.visualViewport;
+    const vv = window.visualViewport;
 
-let keyboardHeight=0;
+    let keyboardHeight = 0;
 
-if(vv){
+    if(vv){
+        keyboardHeight = Math.max(
+            0,
+            window.innerHeight - vv.height - vv.offsetTop
+        );
+    }
 
-keyboardHeight=Math.max(
-0,
-window.innerHeight-vv.height-vv.offsetTop
-);
+    document.documentElement.style.setProperty(
+        '--keyboard-height',
+        keyboardHeight + 'px'
+    );
 
+    const modal = document.getElementById('modal');
+    const sheet = document.querySelector('.sheet');
+
+    if(sheet && modal && modal.style.display === 'flex'){
+
+        const availableHeight = Math.max(
+            220,
+            window.innerHeight -
+            keyboardHeight -
+            16
+        );
+
+        sheet.style.maxHeight = availableHeight + 'px';
+
+        // Keep the entire sheet above the Android keyboard.
+        sheet.style.marginBottom =
+            keyboardHeight > 0
+                ? keyboardHeight + 'px'
+                : '0px';
+
+    }
 }
 
 document.documentElement.style.setProperty(
@@ -1519,48 +1548,54 @@ updateKeyboard
 
 
 document.addEventListener(
-'focusin',
-function(e){
+    'focusin',
+    function(e){
 
-if(e.target.matches('input,select,textarea')){
+        if(!e.target.matches('input,select,textarea')) return;
 
-setTimeout(function(){
+        setTimeout(function(){
 
-const sheet=e.target.closest('.sheet');
+            const field = e.target;
+            const sheet = field.closest('.sheet');
 
-if(sheet){
+            updateKeyboard();
 
-const r=e.target.getBoundingClientRect();
-const sr=sheet.getBoundingClientRect();
+            if(sheet){
 
-if(
-r.bottom>sr.bottom-20 ||
-r.top<sr.top+20
-){
+                const fieldRect = field.getBoundingClientRect();
+                const sheetRect = sheet.getBoundingClientRect();
 
-e.target.scrollIntoView({
-behavior:'smooth',
-block:'center'
-});
+                const topSpace = 20;
+                const bottomSpace = 30;
 
-}
+                if(
+                    fieldRect.bottom > sheetRect.bottom - bottomSpace ||
+                    fieldRect.top < sheetRect.top + topSpace
+                ){
 
-}else{
+                    const targetTop =
+                        field.offsetTop -
+                        (sheet.clientHeight / 2) +
+                        (field.offsetHeight / 2);
 
-e.target.scrollIntoView({
-behavior:'smooth',
-block:'center'
-});
+                    sheet.scrollTo({
+                        top: Math.max(0, targetTop),
+                        behavior:'smooth'
+                    });
+                }
 
-}
+            }else{
 
-updateKeyboard();
+                field.scrollIntoView({
+                    behavior:'smooth',
+                    block:'center'
+                });
 
-},180);
+            }
 
-}
+        },300);
 
-}
+    }
 );
 
 
