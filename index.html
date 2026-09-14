@@ -8,15 +8,54 @@
 :root{--bg:#f4f1e8;--ink:#303b39;--muted:#83908c;--teal:#075b56;--line:#ddd9cf;--card:#fff;--tan:#bc8f63}
 *{box-sizing:border-box}
 html{padding:0;margin:0;background:var(--bg)}
-body{margin:0;background:var(--bg);overflow:hidden;color:var(--ink);font-family:Arial,sans-serif;padding-top:var(--android-status-inset,0px);padding-bottom:var(--android-nav-inset,0px);min-height:100vh}
+body{
+margin:0;
+background:var(--bg);
+overflow:hidden;
+color:var(--ink);
+font-family:Arial,sans-serif;
+padding:0;
+min-height:100vh;
+height:100vh;
+}
 
-header{height:78px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:10px;font-weight:700;letter-spacing:1px;font-size:15px;white-space:nowrap;overflow:hidden}
+header{
+position:fixed;
+top:var(--android-status-inset,0px);
+left:0;
+right:0;
+height:78px;
+border-bottom:1px solid var(--line);
+display:flex;
+align-items:center;
+padding:0 20px;
+gap:10px;
+font-weight:700;
+letter-spacing:1px;
+font-size:15px;
+white-space:nowrap;
+overflow:hidden;
+background:var(--bg);
+z-index:30;
+}
 header b{flex-shrink:0}
 header .status{margin-left:auto;color:var(--teal);font-size:11px;letter-spacing:.5px}
 header #clock{font-size:12px;flex-shrink:0}
 header .avatar{margin-left:2px;background:#f3e5d1;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#956b42;flex-shrink:0}
 
-.wrap{padding:28px 26px calc(100px + var(--android-nav-inset,0px));max-width:760px;margin:auto}
+.wrap{
+position:fixed;
+top:calc(78px + var(--android-status-inset,0px));
+left:0;
+right:0;
+bottom:calc(82px + var(--android-nav-inset,0px));
+overflow-y:auto;
+overflow-x:hidden;
+-webkit-overflow-scrolling:touch;
+padding:28px 26px 32px;
+max-width:760px;
+margin:auto;
+}
 h1{font-size:36px;margin:0 0 20px}
 h2{font-size:22px;margin:0}
 
@@ -39,12 +78,52 @@ h2{font-size:22px;margin:0}
 .done .label{text-decoration:line-through;color:#9aa39f}
 .empty{color:var(--muted);padding:10px 0}
 
-.input{width:100%;padding:13px;border:1px solid #d7d3c8;border-radius:12px;margin:7px 0;background:#fff;font-size:15px}
+.input{
+width:100%;
+padding:13px;
+border:1px solid #d7d3c8;
+border-radius:12px;
+margin:7px 0;
+background:#fff;
+font-size:16px;
+min-height:48px;
+color:var(--ink);
+}
 
-.modal{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;z-index:10;padding-bottom:var(--keyboard-height,0px)}
-.sheet{background:var(--bg);width:100%;max-height:calc(100vh - var(--keyboard-height,0px));overflow-y:auto;border-radius:24px 24px 0 0;padding:24px 24px calc(24px + var(--android-nav-inset,0px))}
+.modal{
+position:fixed;
+inset:0;
+background:#0008;
+display:none;
+align-items:flex-end;
+z-index:100;
+padding:0;
+overflow:hidden;
+}
+.sheet{
+background:var(--bg);
+width:100%;
+max-height:calc(100dvh - var(--keyboard-height,0px) - var(--android-nav-inset,0px));
+overflow-y:auto;
+-webkit-overflow-scrolling:touch;
+border-radius:24px 24px 0 0;
+padding:24px 24px calc(32px + var(--android-nav-inset,0px));
+}
 
-.nav{position:fixed;bottom:var(--android-nav-inset,0px);left:0;right:0;height:82px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;z-index:5}
+.nav{
+position:fixed;
+bottom:var(--android-nav-inset,0px);
+left:0;
+right:0;
+height:82px;
+background:#fff;
+border-top:1px solid var(--line);
+display:flex;
+justify-content:space-around;
+align-items:center;
+z-index:50;
+padding-bottom:env(safe-area-inset-bottom,0px);
+}
 .nav button{border:0;background:none;color:#82908c;font-size:12px;font-weight:700}
 .nav .plus{width:60px;height:60px;border-radius:50%;background:var(--teal);color:#fff;font-size:30px}
 
@@ -54,6 +133,24 @@ h2{font-size:22px;margin:0}
 .delete{font-size:12px}
 .date{color:var(--muted);font-size:14px}
 .small{font-size:13px;color:var(--muted)}
+
+/* MONEY */
+.money-summary{margin-top:18px}
+.money-total-label{color:var(--muted);font-size:14px;margin-bottom:4px}
+.money-total{font-size:38px;font-weight:700;margin-bottom:20px}
+.money-spending-btn{min-width:216px;height:58px;font-size:17px}
+.money-stats{display:flex;gap:14px;flex-wrap:wrap}
+.money-stat{background:#e5efec;color:var(--teal);padding:10px 18px;border-radius:22px;font-size:15px;font-weight:700}
+.money-section{margin-top:18px}
+.money-section-title{font-size:22px;font-weight:700}
+.money-section-muted{color:var(--muted);font-size:16px}
+.money-entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid #eee}
+.money-entry:last-child{border-bottom:0}
+.money-entry-title{font-weight:700}
+.money-entry-info{color:var(--muted);font-size:13px;margin-top:4px}
+.money-entry-amount{font-weight:700;white-space:nowrap}
+.money-delete{font-size:12px}
+
 </style>
 </head>
 
@@ -120,6 +217,86 @@ h2{font-size:22px;margin:0}
 
 </section>
 
+
+<section id="money" class="page">
+
+<h1>Money</h1>
+
+<div class="card money-summary">
+
+<div class="row">
+
+<div>
+<div class="money-total-label">THIS MONTH</div>
+<div class="money-total" id="monthTotal">₹0.00</div>
+</div>
+
+<button class="btn primary money-spending-btn" onclick="addSpending()">
+＋ Add spending
+</button>
+
+</div>
+
+<div class="money-stats">
+
+<span class="money-stat" id="todayTotal">
+Today ₹0.00
+</span>
+
+<span class="money-stat" id="weekTotal">
+Week ₹0.00
+</span>
+
+<span class="money-stat" id="yearTotal">
+Year ₹0.00
+</span>
+
+</div>
+
+</div>
+
+<div class="card money-section">
+
+<div class="row">
+
+<h2 class="money-section-title">
+Spending breakdown
+</h2>
+
+<span class="money-section-muted" id="breakdownStatus">
+No spending yet
+</span>
+
+</div>
+
+<div id="spendingBreakdown">
+<div class="empty">No spending recorded yet.</div>
+</div>
+
+</div>
+
+<div class="card money-section">
+
+<div class="row">
+
+<h2 class="money-section-title">
+Recent spending
+</h2>
+
+<span class="money-section-muted" id="spendingCount">
+0 entries
+</span>
+
+</div>
+
+<div id="recentSpending">
+<div class="empty">No spending recorded yet.</div>
+</div>
+
+</div>
+
+</section>
+
 <section id="study" class="page">
 
 <h1>Study</h1>
@@ -179,7 +356,7 @@ Add important academic dates to your phone calendar and schedule reminders for p
 
 <button onclick="show('study')">▣<br>Study</button>
 
-<button class="plus" onclick="quickAdd()">＋</button>
+<button onclick="show('money')">₹<br>Money</button>
 
 <button onclick="show('works')">⇄<br>Works</button>
 
@@ -220,6 +397,8 @@ priority:'HIGH'
 let works=load('works',[]);
 
 let dates=load('dates',[]);
+
+let spending=load('spending',[]);
 
 let sprint=load('sprint',{
 title:'',
@@ -351,6 +530,8 @@ Delete
 
 '<div class="card"><div class="empty">Create a work to keep projects, assignments or activities separate.</div></div>';
 
+
+renderMoney();
 
 document.getElementById('sprintTitle').textContent=
 sprint.title||'No active sprint';
@@ -909,6 +1090,350 @@ Important date
 }
 
 
+
+function addSpending(){
+
+const today=new Date();
+
+const date=
+today.getFullYear()+'-'+
+String(today.getMonth()+1).padStart(2,'0')+'-'+
+String(today.getDate()).padStart(2,'0');
+
+openM(
+'Add spending',
+
+`
+<input
+class="input"
+id="spendingTitle"
+placeholder="What did you spend on?"
+autocomplete="off"
+>
+
+<input
+class="input"
+id="spendingAmount"
+type="number"
+min="0"
+inputmode="decimal"
+placeholder="Amount ₹"
+>
+
+<select class="input" id="spendingCategory">
+
+<option>Food</option>
+<option>Travel</option>
+<option>Shopping</option>
+<option>Education</option>
+<option>Entertainment</option>
+<option>Health</option>
+<option>Bills</option>
+<option>Other</option>
+
+</select>
+
+<input
+class="input"
+id="spendingDate"
+type="date"
+value="${date}"
+>
+
+<input
+class="input"
+id="spendingNote"
+placeholder="Note (optional)"
+autocomplete="off"
+>
+
+<div class="actions">
+
+<button
+class="btn primary"
+onclick="saveSpending()"
+>
+Save spending
+</button>
+
+</div>
+`
+);
+
+}
+
+
+function saveSpending(){
+
+const title=
+document.getElementById('spendingTitle').value.trim()
+||'Spending';
+
+const amount=
+Number(document.getElementById('spendingAmount').value);
+
+const category=
+document.getElementById('spendingCategory').value;
+
+const date=
+document.getElementById('spendingDate').value;
+
+const note=
+document.getElementById('spendingNote').value.trim();
+
+if(!amount||amount<=0){
+
+alert('Please enter a valid amount.');
+
+return;
+
+}
+
+spending.push({
+
+id:Date.now(),
+title:title,
+amount:amount,
+category:category,
+date:date,
+note:note
+
+});
+
+save('spending',spending);
+
+closeM();
+
+render();
+
+}
+
+
+function renderMoney(){
+
+const now=new Date();
+
+const todayString=
+now.getFullYear()+'-'+
+String(now.getMonth()+1).padStart(2,'0')+'-'+
+String(now.getDate()).padStart(2,'0');
+
+const currentMonth=
+now.getFullYear()+'-'+
+String(now.getMonth()+1).padStart(2,'0');
+
+const currentYear=
+String(now.getFullYear());
+
+const monthSpending=
+spending.filter(x=>
+String(x.date||'').startsWith(currentMonth)
+);
+
+const todaySpending=
+spending.filter(x=>
+x.date===todayString
+);
+
+const yearSpending=
+spending.filter(x=>
+String(x.date||'').startsWith(currentYear)
+);
+
+const monthTotal=
+monthSpending.reduce(
+(sum,x)=>sum+Number(x.amount||0),
+0
+);
+
+const todayTotal=
+todaySpending.reduce(
+(sum,x)=>sum+Number(x.amount||0),
+0
+);
+
+const yearTotal=
+yearSpending.reduce(
+(sum,x)=>sum+Number(x.amount||0),
+0
+);
+
+const monthEl=document.getElementById('monthTotal');
+const todayEl=document.getElementById('todayTotal');
+const weekEl=document.getElementById('weekTotal');
+const yearEl=document.getElementById('yearTotal');
+
+if(!monthEl)return;
+
+monthEl.textContent='₹'+monthTotal.toFixed(2);
+
+todayEl.textContent='Today ₹'+todayTotal.toFixed(2);
+
+yearEl.textContent='Year ₹'+yearTotal.toFixed(2);
+
+
+/* WEEK */
+
+const weekStart=new Date(now);
+
+weekStart.setHours(0,0,0,0);
+
+const day=weekStart.getDay();
+
+weekStart.setDate(
+weekStart.getDate()-
+(day===0?6:day-1)
+);
+
+const weekTotal=
+spending
+.filter(x=>{
+
+if(!x.date)return false;
+
+const d=new Date(x.date+'T00:00:00');
+
+return d>=weekStart&&d<=now;
+
+})
+.reduce(
+(sum,x)=>sum+Number(x.amount||0),
+0
+);
+
+weekEl.textContent='Week ₹'+weekTotal.toFixed(2);
+
+
+/* BREAKDOWN */
+
+const categories={};
+
+monthSpending.forEach(x=>{
+
+const category=x.category||'Other';
+
+categories[category]=
+(categories[category]||0)+
+Number(x.amount||0);
+
+});
+
+const breakdown=
+Object.entries(categories)
+.sort((a,b)=>b[1]-a[1]);
+
+const breakdownBox=
+document.getElementById('spendingBreakdown');
+
+const breakdownStatus=
+document.getElementById('breakdownStatus');
+
+if(!breakdown.length){
+
+breakdownStatus.textContent='No spending yet';
+
+breakdownBox.innerHTML=
+'<div class="empty">No spending recorded yet.</div>';
+
+}else{
+
+breakdownStatus.textContent=
+breakdown.length+' categories';
+
+breakdownBox.innerHTML=
+breakdown.map(x=>`
+
+<div class="money-entry">
+
+<div class="money-entry-title">
+${esc(x[0])}
+</div>
+
+<div class="money-entry-amount">
+₹${Number(x[1]).toFixed(2)}
+</div>
+
+</div>
+
+`).join('');
+
+}
+
+
+/* RECENT SPENDING */
+
+const recent=
+spending
+.slice()
+.sort((a,b)=>Number(b.id)-Number(a.id));
+
+document.getElementById('spendingCount').textContent=
+recent.length+' entries';
+
+const recentBox=
+document.getElementById('recentSpending');
+
+if(!recent.length){
+
+recentBox.innerHTML=
+'<div class="empty">No spending recorded yet.</div>';
+
+}else{
+
+recentBox.innerHTML=
+recent.slice(0,10).map(x=>`
+
+<div class="money-entry">
+
+<div style="flex:1">
+
+<div class="money-entry-title">
+${esc(x.title||'Spending')}
+</div>
+
+<div class="money-entry-info">
+${esc(x.category||'Other')} • ${esc(x.date||'')}
+${x.note?' • '+esc(x.note):''}
+</div>
+
+</div>
+
+<div>
+
+<div class="money-entry-amount">
+₹${Number(x.amount||0).toFixed(2)}
+</div>
+
+<button
+class="btn delete money-delete"
+onclick="deleteSpending(${x.id})"
+>
+Delete
+</button>
+
+</div>
+
+</div>
+
+`).join('');
+
+}
+
+}
+
+
+function deleteSpending(id){
+
+spending=
+spending.filter(x=>x.id!==id);
+
+save('spending',spending);
+
+render();
+
+}
+
+
 function clock(){
 
 let d=new Date();
@@ -945,18 +1470,36 @@ function updateKeyboard(){
 
 const vv=window.visualViewport;
 
-const keyboardHeight=
-vv?
-Math.max(
+let keyboardHeight=0;
+
+if(vv){
+
+keyboardHeight=Math.max(
 0,
 window.innerHeight-vv.height-vv.offsetTop
-):
-0;
+);
+
+}
 
 document.documentElement.style.setProperty(
 '--keyboard-height',
 keyboardHeight+'px'
 );
+
+const sheet=document.querySelector('.sheet');
+
+if(
+sheet &&
+document.getElementById('modal').style.display==='flex'
+){
+
+sheet.style.maxHeight=
+Math.max(
+220,
+window.innerHeight-keyboardHeight-16
+)+'px';
+
+}
 
 }
 
@@ -984,12 +1527,37 @@ if(e.target.matches('input,select,textarea')){
 
 setTimeout(function(){
 
+const sheet=e.target.closest('.sheet');
+
+if(sheet){
+
+const r=e.target.getBoundingClientRect();
+const sr=sheet.getBoundingClientRect();
+
+if(
+r.bottom>sr.bottom-20 ||
+r.top<sr.top+20
+){
+
 e.target.scrollIntoView({
 behavior:'smooth',
 block:'center'
 });
 
-},150);
+}
+
+}else{
+
+e.target.scrollIntoView({
+behavior:'smooth',
+block:'center'
+});
+
+}
+
+updateKeyboard();
+
+},180);
 
 }
 
@@ -998,6 +1566,18 @@ block:'center'
 
 
 updateKeyboard();
+
+window.addEventListener(
+'resize',
+updateKeyboard
+);
+
+window.addEventListener(
+'orientationchange',
+function(){
+setTimeout(updateKeyboard,250);
+}
+);
 
 clock();
 
