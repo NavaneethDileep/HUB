@@ -79,23 +79,24 @@ h2{font-size:22px;margin:0}
 .empty{color:var(--muted);padding:10px 0}
 
 .input{
-    width:100%;
-    padding:13px;
-    border:1px solid #d7d3c8;
-    border-radius:12px;
-    margin:7px 0;
-    background:#fff;
-    font-size:16px;
-    min-height:48px;
-    color:var(--ink);
-    outline:none;
-    -webkit-appearance:none;
-    appearance:none;
+width:100%;
+padding:13px;
+border:1px solid #d7d3c8;
+border-radius:12px;
+margin:7px 0;
+background:#fff;
+font-size:16px;
+min-height:48px;
+color:var(--ink);
 }
 
 .modal{
 position:fixed;
-inset:0;
+top:0;
+left:0;
+right:0;
+bottom:0;
+height:100dvh;
 background:#0008;
 display:none;
 align-items:flex-end;
@@ -105,9 +106,11 @@ overflow:hidden;
 .sheet{
 background:var(--bg);
 width:100%;
-max-height:calc(100dvh - var(--keyboard-height,0px));
+max-height:calc(100dvh - var(--keyboard-height,0px) - 16px);
 overflow-y:auto;
 -webkit-overflow-scrolling:touch;
+overscroll-behavior:contain;
+box-sizing:border-box;
 border-radius:24px 24px 0 0;
 padding:24px 24px calc(32px + var(--android-nav-inset,0px));
 }
@@ -1274,7 +1277,7 @@ todayEl.textContent='Today ₹'+todayTotal.toFixed(2);
 yearEl.textContent='Year ₹'+yearTotal.toFixed(2);
 
 
-/* WEEK */
+
 
 const weekStart=new Date(now);
 
@@ -1327,302 +1330,4 @@ Object.entries(categories)
 const breakdownBox=
 document.getElementById('spendingBreakdown');
 
-const breakdownStatus=
-document.getElementById('breakdownStatus');
-
-if(!breakdown.length){
-
-breakdownStatus.textContent='No spending yet';
-
-breakdownBox.innerHTML=
-'<div class="empty">No spending recorded yet.</div>';
-
-}else{
-
-breakdownStatus.textContent=
-breakdown.length+' categories';
-
-breakdownBox.innerHTML=
-breakdown.map(x=>`
-
-<div class="money-entry">
-
-<div class="money-entry-title">
-${esc(x[0])}
-</div>
-
-<div class="money-entry-amount">
-₹${Number(x[1]).toFixed(2)}
-</div>
-
-</div>
-
-`).join('');
-
-}
-
-
-/* RECENT SPENDING */
-
-const recent=
-spending
-.slice()
-.sort((a,b)=>Number(b.id)-Number(a.id));
-
-document.getElementById('spendingCount').textContent=
-recent.length+' entries';
-
-const recentBox=
-document.getElementById('recentSpending');
-
-if(!recent.length){
-
-recentBox.innerHTML=
-'<div class="empty">No spending recorded yet.</div>';
-
-}else{
-
-recentBox.innerHTML=
-recent.slice(0,10).map(x=>`
-
-<div class="money-entry">
-
-<div style="flex:1">
-
-<div class="money-entry-title">
-${esc(x.title||'Spending')}
-</div>
-
-<div class="money-entry-info">
-${esc(x.category||'Other')} • ${esc(x.date||'')}
-${x.note?' • '+esc(x.note):''}
-</div>
-
-</div>
-
-<div>
-
-<div class="money-entry-amount">
-₹${Number(x.amount||0).toFixed(2)}
-</div>
-
-<button
-class="btn delete money-delete"
-onclick="deleteSpending(${x.id})"
->
-Delete
-</button>
-
-</div>
-
-</div>
-
-`).join('');
-
-}
-
-}
-
-
-function deleteSpending(id){
-
-spending=
-spending.filter(x=>x.id!==id);
-
-save('spending',spending);
-
-render();
-
-}
-
-
-function clock(){
-
-let d=new Date();
-
-document.getElementById('clock').textContent=
-d.toLocaleTimeString([],{
-hour:'2-digit',
-minute:'2-digit'
-})+' IST';
-
-document.getElementById('today').textContent=
-d.toLocaleDateString(undefined,{
-weekday:'long',
-day:'numeric',
-month:'long',
-year:'numeric'
-});
-
-let h=d.getHours();
-
-let greeting=
-h<12?'Good morning':
-h<17?'Good afternoon':
-h<20?'Good evening':
-'Good night';
-
-document.getElementById('greet').textContent=
-greeting+', Navaneeth';
-
-}
-
-
-function updateKeyboard(){
-
-    const vv = window.visualViewport;
-
-    let keyboardHeight = 0;
-
-    if(vv){
-        keyboardHeight = Math.max(
-            0,
-            window.innerHeight - vv.height - vv.offsetTop
-        );
-    }
-
-    document.documentElement.style.setProperty(
-        '--keyboard-height',
-        keyboardHeight + 'px'
-    );
-
-    const modal = document.getElementById('modal');
-    const sheet = document.querySelector('.sheet');
-
-    if(sheet && modal && modal.style.display === 'flex'){
-
-        const availableHeight = Math.max(
-            220,
-            window.innerHeight -
-            keyboardHeight -
-            16
-        );
-
-        sheet.style.maxHeight = availableHeight + 'px';
-
-        // Keep the entire sheet above the Android keyboard.
-        sheet.style.marginBottom =
-            keyboardHeight > 0
-                ? keyboardHeight + 'px'
-                : '0px';
-
-    }
-}
-
-document.documentElement.style.setProperty(
-'--keyboard-height',
-keyboardHeight+'px'
-);
-
-const sheet=document.querySelector('.sheet');
-
-if(
-sheet &&
-document.getElementById('modal').style.display==='flex'
-){
-
-sheet.style.maxHeight=
-Math.max(
-220,
-window.innerHeight-keyboardHeight-16
-)+'px';
-
-}
-
-}
-
-
-if(window.visualViewport){
-
-window.visualViewport.addEventListener(
-'resize',
-updateKeyboard
-);
-
-window.visualViewport.addEventListener(
-'scroll',
-updateKeyboard
-);
-
-}
-
-
-document.addEventListener(
-    'focusin',
-    function(e){
-
-        if(!e.target.matches('input,select,textarea')) return;
-
-        setTimeout(function(){
-
-            const field = e.target;
-            const sheet = field.closest('.sheet');
-
-            updateKeyboard();
-
-            if(sheet){
-
-                const fieldRect = field.getBoundingClientRect();
-                const sheetRect = sheet.getBoundingClientRect();
-
-                const topSpace = 20;
-                const bottomSpace = 30;
-
-                if(
-                    fieldRect.bottom > sheetRect.bottom - bottomSpace ||
-                    fieldRect.top < sheetRect.top + topSpace
-                ){
-
-                    const targetTop =
-                        field.offsetTop -
-                        (sheet.clientHeight / 2) +
-                        (field.offsetHeight / 2);
-
-                    sheet.scrollTo({
-                        top: Math.max(0, targetTop),
-                        behavior:'smooth'
-                    });
-                }
-
-            }else{
-
-                field.scrollIntoView({
-                    behavior:'smooth',
-                    block:'center'
-                });
-
-            }
-
-        },300);
-
-    }
-);
-
-
-updateKeyboard();
-
-window.addEventListener(
-'resize',
-updateKeyboard
-);
-
-window.addEventListener(
-'orientationchange',
-function(){
-setTimeout(updateKeyboard,250);
-}
-);
-
-clock();
-
-setInterval(clock,1000);
-
-render();
-
-if(sprint.running)
-startTick();
-
-</script>
-
-</body>
-</html>
+const
