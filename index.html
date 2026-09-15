@@ -46,12 +46,13 @@ header .avatar{margin-left:2px;background:#f3e5d1;width:40px;height:40px;border-
 .wrap{
 position:fixed;
 top:calc(78px + var(--android-status-inset,0px));
-left:0;right:0;
-bottom:calc(var(--nav-height,82px) + var(--android-nav-inset,0px));
+left:0;
+right:0;
+bottom:calc(82px + var(--android-nav-inset,0px));
 overflow-y:auto;
 overflow-x:hidden;
 -webkit-overflow-scrolling:touch;
-padding:28px 26px 32px;
+padding:12px 26px 32px;
 max-width:760px;
 margin:auto;
 }
@@ -91,7 +92,7 @@ color:var(--ink);
 
 .modal{
 position:fixed;
-top:0;left:0;right:0;bottom:0;
+inset:0;
 background:#0008;
 display:none;
 align-items:flex-end;
@@ -101,14 +102,13 @@ overflow:hidden;
 .sheet{
 background:var(--bg);
 width:100%;
-max-height:calc(100% - 16px);
+max-height:calc(100dvh - var(--keyboard-height,0px));
 overflow-y:auto;
 -webkit-overflow-scrolling:touch;
-overscroll-behavior:contain;
-box-sizing:border-box;
 border-radius:24px 24px 0 0;
 padding:24px 24px calc(32px + var(--android-nav-inset,0px));
 }
+
 .nav{
 position:fixed;
 bottom:var(--android-nav-inset,0px);
@@ -149,10 +149,59 @@ padding-bottom:env(safe-area-inset-bottom,0px);
 .money-entry-info{color:var(--muted);font-size:13px;margin-top:4px}
 .money-entry-amount{font-weight:700;white-space:nowrap}
 .money-delete{font-size:12px}
-.money-bar-row{margin:10px 0}
-.money-bar-label{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
-.money-bar-track{background:#ebe9df;border-radius:8px;height:10px;overflow:hidden}
-.money-bar-fill{background:var(--teal);height:100%;border-radius:8px}
+
+
+.quick-add-card{
+margin-top:18px;
+}
+
+.quick-add-subtitle{
+margin:6px 0 16px;
+}
+
+.quick-add-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+}
+
+.quick-add-btn{
+min-height:110px;
+border:1px solid #d8d5cb;
+background:#fff;
+border-radius:16px;
+color:var(--ink);
+font-size:15px;
+font-weight:700;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:9px;
+padding:10px 5px;
+}
+
+.quick-add-btn:active{
+transform:scale(.97);
+}
+
+.quick-add-icon{
+font-size:25px;
+line-height:1;
+}
+
+@media(max-width:420px){
+.quick-add-grid{
+gap:8px;
+}
+.quick-add-btn{
+font-size:13px;
+min-height:100px;
+}
+.quick-add-icon{
+font-size:22px;
+}
+}
 
 </style>
 </head>
@@ -162,7 +211,7 @@ padding-bottom:env(safe-area-inset-bottom,0px);
 <header>
 <b>HUB</b>
 <span class="status">● LOCAL</span>
-<span id="clock">--:-- IST</span>
+<span id="clock">10:26 pm IST</span>
 <span class="avatar">N</span>
 </header>
 
@@ -170,12 +219,12 @@ padding-bottom:env(safe-area-inset-bottom,0px);
 
 <section id="dashboard" class="page active">
 
-<h1 id="greet">Good day</h1>
+<h1 id="greet">Good night, Navaneeth</h1>
 <div class="small" id="today"></div>
 
 <div class="card">
 <div class="row">
-<h2>Live Sprint Engine</h2>
+<h2>Live Event</h2>
 <span class="pill">LOCAL</span>
 </div>
 
@@ -208,6 +257,40 @@ padding-bottom:env(safe-area-inset-bottom,0px);
 <button class="btn" onclick="addTask()">＋ Add</button>
 </div>
 <div id="tasks"></div>
+</div>
+
+<div class="card quick-add-card">
+
+<h2>Quick Add</h2>
+
+<p class="small quick-add-subtitle">
+Add a new item quickly
+</p>
+
+<div class="quick-add-grid">
+
+<button class="quick-add-btn" onclick="addTask()">
+<span class="quick-add-icon">☑</span>
+<span>Task</span>
+</button>
+
+<button class="quick-add-btn" onclick="newSprint()">
+<span class="quick-add-icon">▶</span>
+<span>Live event</span>
+</button>
+
+<button class="quick-add-btn" onclick="addWork()">
+<span class="quick-add-icon">⇄</span>
+<span>Work</span>
+</button>
+
+<button class="quick-add-btn" onclick="addDate()">
+<span class="quick-add-icon">▣</span>
+<span>Important<br>date</span>
+</button>
+
+</div>
+
 </div>
 
 <div class="card">
@@ -412,16 +495,6 @@ total:1500
 
 let timer=null;
 
-/* ---- safe bridge call (avoids crashing when previewing outside the Android app) ---- */
-function androidCall(fn,...args){
-  try{
-    if(typeof Android!=='undefined' && typeof Android[fn]==='function'){
-      Android[fn](...args);
-    }
-  }catch(e){
-    console.warn('Android bridge unavailable:',fn,e);
-  }
-}
 
 function show(id){
 
@@ -855,7 +928,7 @@ when
 
 save('dates',dates);
 
-androidCall('scheduleReminder',title,when);
+Android.scheduleReminder(title,when);
 
 closeM();
 
@@ -880,8 +953,7 @@ function calendar(id){
 let d=dates.find(x=>x.id===id);
 
 if(d)
-androidCall(
-'addCalendar',
+Android.addCalendar(
 d.title,
 String(d.when),
 String(d.when+3600000),
@@ -897,8 +969,7 @@ let pending=tasks.filter(t=>!t.done);
 
 if(pending.length)
 
-androidCall(
-'scheduleReminder',
+Android.scheduleReminder(
 pending.length+' pending academic task(s)',
 Date.now()+1000
 );
@@ -1224,17 +1295,6 @@ render();
 }
 
 
-function delSpending(id){
-
-spending=spending.filter(x=>x.id!==id);
-
-save('spending',spending);
-
-render();
-
-}
-
-
 function renderMoney(){
 
 const now=new Date();
@@ -1298,7 +1358,7 @@ todayEl.textContent='Today ₹'+todayTotal.toFixed(2);
 yearEl.textContent='Year ₹'+yearTotal.toFixed(2);
 
 
-
+/* WEEK */
 
 const weekStart=new Date(now);
 
@@ -1354,195 +1414,265 @@ document.getElementById('spendingBreakdown');
 const breakdownStatus=
 document.getElementById('breakdownStatus');
 
-if(breakdown.length){
-
-breakdownStatus.textContent=
-breakdown.length+' categor'+(breakdown.length===1?'y':'ies');
-
-breakdownBox.innerHTML=
-breakdown.map(([cat,amt])=>{
-
-const pct=
-monthTotal?Math.round((amt/monthTotal)*100):0;
-
-return `
-<div class="money-bar-row">
-<div class="money-bar-label">
-<span>${esc(cat)}</span>
-<span>₹${amt.toFixed(2)} · ${pct}%</span>
-</div>
-<div class="money-bar-track">
-<div class="money-bar-fill" style="width:${pct}%"></div>
-</div>
-</div>
-`;
-
-}).join('');
-
-}else{
+if(!breakdown.length){
 
 breakdownStatus.textContent='No spending yet';
 
 breakdownBox.innerHTML=
 '<div class="empty">No spending recorded yet.</div>';
 
-}
+}else{
 
+breakdownStatus.textContent=
+breakdown.length+' categories';
 
-/* RECENT SPENDING */
-
-const recentBox=
-document.getElementById('recentSpending');
-
-const spendingCount=
-document.getElementById('spendingCount');
-
-spendingCount.textContent=
-spending.length+' entr'+(spending.length===1?'y':'ies');
-
-if(spending.length){
-
-const recent=
-[...spending]
-.sort((a,b)=>b.id-a.id)
-.slice(0,15);
-
-recentBox.innerHTML=
-recent.map(x=>`
+breakdownBox.innerHTML=
+breakdown.map(x=>`
 
 <div class="money-entry">
 
-<div>
-<div class="money-entry-title">${esc(x.title)}</div>
-<div class="money-entry-info">
-${esc(x.category||'Other')} · ${esc(x.date||'')}
-${x.note?(' · '+esc(x.note)):''}
-</div>
+<div class="money-entry-title">
+${esc(x[0])}
 </div>
 
-<div style="display:flex;align-items:center;gap:10px">
-<div class="money-entry-amount">₹${Number(x.amount||0).toFixed(2)}</div>
-<button class="btn delete money-delete" onclick="delSpending(${x.id})">
-Delete
-</button>
+<div class="money-entry-amount">
+₹${Number(x[1]).toFixed(2)}
 </div>
 
 </div>
 
 `).join('');
 
-}else{
+}
+
+
+/* RECENT SPENDING */
+
+const recent=
+spending
+.slice()
+.sort((a,b)=>Number(b.id)-Number(a.id));
+
+document.getElementById('spendingCount').textContent=
+recent.length+' entries';
+
+const recentBox=
+document.getElementById('recentSpending');
+
+if(!recent.length){
 
 recentBox.innerHTML=
 '<div class="empty">No spending recorded yet.</div>';
 
-}
-
-}
-
-
-/* ---- greeting / clock ---- */
-
-function updateClock(){
-
-const now=new Date();
-
-let h=now.getHours();
-
-const m=String(now.getMinutes()).padStart(2,'0');
-
-const ampm=h>=12?'pm':'am';
-
-let h12=h%12;
-
-if(h12===0)h12=12;
-
-const clockEl=document.getElementById('clock');
-
-if(clockEl)
-clockEl.textContent=
-String(h12).padStart(2,'0')+':'+m+' '+ampm+' IST';
-
-const greetEl=document.getElementById('greet');
-
-if(greetEl){
-
-let greeting='Good night';
-
-if(h>=5&&h<12)greeting='Good morning';
-
-else if(h>=12&&h<17)greeting='Good afternoon';
-
-else if(h>=17&&h<21)greeting='Good evening';
-
-greetEl.textContent=greeting+', Navaneeth';
-
-}
-
-const todayEl=document.getElementById('today');
-
-if(todayEl)
-todayEl.textContent=
-now.getDate()+'/'+(now.getMonth()+1)+'/'+now.getFullYear();
-
-}
-
-
-/* ---- viewport / keyboard handling (cross-device) ---- */
-
-function setNavHeight(){
-  const nav=document.querySelector('.nav');
-  if(nav) document.documentElement.style.setProperty('--nav-height', nav.offsetHeight+'px');
-}
-
-function positionModal(){
-  const modal=document.getElementById('modal');
-  if(!modal) return;
-  if(window.visualViewport){
-    modal.style.height=window.visualViewport.height+'px';
-    modal.style.top=window.visualViewport.offsetTop+'px';
-  }else{
-    modal.style.height=window.innerHeight+'px';
-    modal.style.top='0px';
-  }
-}
-
-function scrollActiveIntoView(){
-  const active=document.activeElement;
-  if(active && active.matches('input,select,textarea')){
-    setTimeout(()=>active.scrollIntoView({block:'center',behavior:'smooth'}),300);
-  }
-}
-
-function updateKeyboard(){
-  positionModal();
-  scrollActiveIntoView();
-}
-
-window.addEventListener('load',()=>{ setNavHeight(); positionModal(); render(); updateClock(); });
-
-window.addEventListener('resize',()=>{ setNavHeight(); positionModal(); });
-
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize',()=>{ positionModal(); scrollActiveIntoView(); });
-  window.visualViewport.addEventListener('scroll', positionModal);
 }else{
-  let lastHeight=window.innerHeight;
-  window.addEventListener('resize',()=>{
-    if(window.innerHeight<lastHeight-150){ scrollActiveIntoView(); }
-    lastHeight=window.innerHeight;
-  });
+
+recentBox.innerHTML=
+recent.slice(0,10).map(x=>`
+
+<div class="money-entry">
+
+<div style="flex:1">
+
+<div class="money-entry-title">
+${esc(x.title||'Spending')}
+</div>
+
+<div class="money-entry-info">
+${esc(x.category||'Other')} • ${esc(x.date||'')}
+${x.note?' • '+esc(x.note):''}
+</div>
+
+</div>
+
+<div>
+
+<div class="money-entry-amount">
+₹${Number(x.amount||0).toFixed(2)}
+</div>
+
+<button
+class="btn delete money-delete"
+onclick="deleteSpending(${x.id})"
+>
+Delete
+</button>
+
+</div>
+
+</div>
+
+`).join('');
+
 }
 
-document.addEventListener('focusin', e=>{
-  if(e.target.matches('input,select,textarea')){
-    scrollActiveIntoView();
-  }
+}
+
+
+function deleteSpending(id){
+
+spending=
+spending.filter(x=>x.id!==id);
+
+save('spending',spending);
+
+render();
+
+}
+
+
+function clock(){
+
+let d=new Date();
+
+document.getElementById('clock').textContent=
+d.toLocaleTimeString([],{
+hour:'2-digit',
+minute:'2-digit'
+})+' IST';
+
+document.getElementById('today').textContent=
+d.toLocaleDateString(undefined,{
+weekday:'long',
+day:'numeric',
+month:'long',
+year:'numeric'
 });
 
-setInterval(updateClock,1000);
+let h=d.getHours();
 
-if(sprint.running) startTick();
+let greeting=
+h<12?'Good morning':
+h<17?'Good afternoon':
+h<20?'Good evening':
+'Good night';
+
+document.getElementById('greet').textContent=
+greeting+', Navaneeth';
+
+}
+
+
+function updateKeyboard(){
+
+const vv=window.visualViewport;
+
+let keyboardHeight=0;
+
+if(vv){
+
+keyboardHeight=Math.max(
+0,
+window.innerHeight-vv.height-vv.offsetTop
+);
+
+}
+
+document.documentElement.style.setProperty(
+'--keyboard-height',
+keyboardHeight+'px'
+);
+
+const sheet=document.querySelector('.sheet');
+
+if(
+sheet &&
+document.getElementById('modal').style.display==='flex'
+){
+
+sheet.style.maxHeight=
+Math.max(
+220,
+window.innerHeight-keyboardHeight-16
+)+'px';
+
+}
+
+}
+
+
+if(window.visualViewport){
+
+window.visualViewport.addEventListener(
+'resize',
+updateKeyboard
+);
+
+window.visualViewport.addEventListener(
+'scroll',
+updateKeyboard
+);
+
+}
+
+
+document.addEventListener(
+'focusin',
+function(e){
+
+if(e.target.matches('input,select,textarea')){
+
+setTimeout(function(){
+
+const sheet=e.target.closest('.sheet');
+
+if(sheet){
+
+const r=e.target.getBoundingClientRect();
+const sr=sheet.getBoundingClientRect();
+
+if(
+r.bottom>sr.bottom-20 ||
+r.top<sr.top+20
+){
+
+e.target.scrollIntoView({
+behavior:'smooth',
+block:'center'
+});
+
+}
+
+}else{
+
+e.target.scrollIntoView({
+behavior:'smooth',
+block:'center'
+});
+
+}
+
+updateKeyboard();
+
+},180);
+
+}
+
+}
+);
+
+
+updateKeyboard();
+
+window.addEventListener(
+'resize',
+updateKeyboard
+);
+
+window.addEventListener(
+'orientationchange',
+function(){
+setTimeout(updateKeyboard,250);
+}
+);
+
+clock();
+
+setInterval(clock,1000);
+
+render();
+
+if(sprint.running)
+startTick();
 
 </script>
 
